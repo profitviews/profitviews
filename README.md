@@ -5,7 +5,7 @@
 <a href="https://profitview.net" target="_blank"><img src="/assets/images/logo.png" style="width:500px"/></a> 
 
 
-https://github.com/profitviews/profitviews/assets/52894706/fa5334ca-e9b6-4dc6-a383-a670d693baf5
+![](/assets/images/bot-demo.gif)
 
 
 

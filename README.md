@@ -3,7 +3,10 @@
 -->
 
 <a href="https://profitview.net" target="_blank"><img src="/assets/images/logo.png" style="width:500px"/></a> 
-https://cloud.profitview.net/assets/videos/bot-demo.mp4
+
+<video autoplay="" playsinline="" loop="" muted="">
+    <source src="https://cloud.profitview.net/assets/videos/bot-demo.mp4" type="video/mp4">
+</video>
 
 # Trade Betterᵀᴹ
 

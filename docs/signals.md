@@ -311,7 +311,7 @@ def post_webhook(self, data):
 
 ### Supported Exchanges
 
-Use the [Supported Exchanges list](https://profitview.net/trading-docs/supported-exchanges) in the Trading docs to obtain valid `src` strings for `self.signal(...)`.
+Use the [Supported Exchanges list](https://profitview.net/docs/trading/#supported-exchanges) in the Trading docs to obtain valid `src` strings for `self.signal(...)`.
 
 
 <!--

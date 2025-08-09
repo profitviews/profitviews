@@ -13,11 +13,12 @@ A Signal bot is built on an event-driven architecture. Market events trigger cal
 
 ## Getting Started
 
-- Sign up for a plan (Hobby $29, Active Trader $59, or Professional $299)
+- Sign up and verify your email address
+- Choose a plan (Hobby $29, Active Trader $59, or Professional $299)
 - Open the Signals IDE: `https://profitview.net/trading/signals`
 - Create a new file; ensure your main class is defined (see below)
 
-**Note:** your script must define the main class for the runtime to load it so that Trading Bots will function.
+**Note:** your script must define the main `Signals` class for the runtime to load it so that Trading Bots will function.
 
 
 ## Base Class
@@ -84,7 +85,7 @@ Example `data`:
 ```python
 {
     'side': 'Buy',              # side of taker in trade
-    'price': 21611.5,           # price of matched order
+    'price': 121611.5,           # price of matched order
     'size': 200.0,              # size of matched order
     'time': 1678364683876       # epoch timestamp from exchange
 }
@@ -117,8 +118,8 @@ def candle_update_1m(self, src, sym, bars):
 
 ### Initialization
 
-- `on_start(self)` — runs once when `Link` infrastructure is ready. Note callbacks may trigger before this.
-- `__init__(self, *args, **kwargs)` — if you override this, you must call `Link.__init__(self, *args, **kwargs)` to initialize event handling.
+- `on_start(self)` — runs once when `Link` infrastructure is ready. Note **callbacks may trigger before this**.
+- `__init__(self, *args, **kwargs)` — if you override this, you must call `Link.__init__(self, *args, **kwargs)` at some point in `__init__()` to initialize event handling.
 
 
 ## Emitting Signals

@@ -15,6 +15,7 @@ A Signal bot is built on an event-driven architecture. Market events trigger cal
 
 - Sign up and verify your email address
 - Choose a plan (Hobby $29, Active Trader $59, or Professional $299)
+- **Signals** is Beta: request access from ProfitView management.
 - Open the Signals IDE: `https://profitview.net/trading/signals`
 - Create a new file; ensure your main class is defined (see below)
 

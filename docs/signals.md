@@ -197,6 +197,39 @@ Connect to your private websocket feed:
 wss://profitview.net/stream?token=YOUR_API_KEY
 ```
 
+### Test with wscat
+
+1. Install wscat (Node.js):
+
+```bash
+npm i -g wscat
+```
+
+2. Connect to your private stream:
+
+```bash
+wscat -c "wss://profitview.net/stream?token=YOUR_API_KEY"
+```
+- **Note** - API Key found in SETTINGS -> Account
+- Tip: avoid putting secrets in shell history:
+
+```bash
+export PV_TOKEN=YOUR_API_KEY
+wscat -c "wss://profitview.net/stream?token=$PV_TOKEN"
+```
+
+3. From your Signal bot, publish a test message:
+
+```python
+self.publish("test", {"hello": "world"})
+```
+
+4. In wscat, you should see:
+
+```json
+{ "type": "test", "data": { "hello": "world" } }
+```
+
 Once connected you will receive messages in the format:
 
 ```python

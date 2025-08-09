@@ -2,11 +2,14 @@
 
 ## Overview
 
+The Signals interface in ProfitView lets you build event-driven trading strategies in Python. Your strategy reacts to live market events and sends trading intent using `self.signal(...)`. Execution, risk management, and exchange connectivity are handled by ProfitView.
+
 A Signal bot is built on an event-driven architecture. Market events trigger callback functions. These callbacks may handle public market data (quotes, trades, candles) and generate signals that downstream bots or processes can consume.
 
 <div class="centered" style="margin-bottom: 20px;">
     <img src="/assets/images/trading-bot-architecture-white.png" alt="Signal Bot Architecture">
 </div>
+
 
 ## Getting Started
 
@@ -20,8 +23,6 @@ A Signal bot is built on an event-driven architecture. Market events trigger cal
 ## Base Class
 
 The base class `Link` provides helper properties and methods you can use in your Signal bot.
-
-[If desired, copy the same property/method list as Trading bots, or link to it.]
 
 <div style="margin-bottom: 24px"></div>
 
@@ -46,8 +47,6 @@ The base class `Link` provides helper properties and methods you can use in your
 > iso_now → `str`
 
 >>> Current UTC ISO 8601 string
-
-[Add any additional helpers you want to document here.]
 
 
 ## Event Callbacks
@@ -91,7 +90,7 @@ Example `data`:
 }
 ```
 
-### Candle Update Xm 
+### Candle Update Xm
 
 Receive rolling OHLCV bars for a given timeframe.
 
@@ -99,9 +98,11 @@ Receive rolling OHLCV bars for a given timeframe.
 def candle_update_1m(self, src: str, sym: str, bars)
 ```
 
-- `bars.opens`, `bars.highs`, `bars.lows`, `bars.closes`, `bars.volumes` each hold 360 items
+- `bars.opens`, `bars.highs`, `bars.lows`, `bars.closes`, `bars.volumes` each hold 360 elements
 - `bars[i]` returns `{time, open, high, low, close, volume}`
 - Called on every trade, not just at candle boundaries
+- `bars.closes[-1]` and `bars.volumes[-1]` update on every trade; `bars.highs[-1]` and `bars.lows[-1]` may update intra-candle; `bars.opens[-1]` updates once per candle
+- `bars.closes` format is compatible with TA-Lib functions
 
 Example RSI signal:
 
@@ -113,6 +114,11 @@ def candle_update_1m(self, src, sym, bars):
     if rsi > 70:
         self.signal(src, sym, size=-0.5)
 ```
+
+### Initialization
+
+- `on_start(self)` — runs once when `Link` infrastructure is ready. Note callbacks may trigger before this.
+- `__init__(self, *args, **kwargs)` — if you override this, you must call `Link.__init__(self, *args, **kwargs)` to initialize event handling.
 
 
 ## Emitting Signals
@@ -131,6 +137,46 @@ self.signal(src, sym, mid=30000)
 # Maker quote fair value
 self.signal(src, sym, quote=30000)
 ```
+
+
+## Bot Types & Signal Formats
+
+Choose a bot type that matches the signal format you will emit. Parameters are configured in the bot creation UI and are not accessible from Python code.
+
+### Position
+
+- Signal: `self.signal(src, sym, size=value)`
+- Description: Expresses directional intent between -1.0 (max short) and 1.0 (max long). Execution respects the user's position limits.
+- Mandatory params: `max_position_size`
+- Optional params: `stop_loss_pct`, `take_profit_pct`, `close_on_stop`, `trading_start_time`, `trading_stop_time`, `order_fill_delay`, `order_min_pct_change`, `limit_post_only`
+
+### Neutral Grid
+
+- Signal: `self.signal(src, sym, mid=value)`
+- Description: Places symmetric grid orders above and below mid price.
+- Mandatory params: `grid_count`, `grid_spread`
+- Optional params: `min_spread`, `max_order_size`, `order_refresh_delay`, `take_profit_pct`, `stop_loss_pct`, `trail_stop_loss_pct`, `trail_stop_loss_entry_pct`, `limit_post_only`
+
+### Short Grid
+
+- Signal: `self.signal(src, sym, ask=value)`
+- Description: Sell-side grid above ask price.
+- Mandatory params: `grid_count`, `grid_spread`, `grid_side`
+- Optional params: same as Neutral Grid
+
+### Long Grid
+
+- Signal: `self.signal(src, sym, bid=value)`
+- Description: Buy-side grid below bid price.
+- Mandatory params: `grid_count`, `grid_spread`, `grid_side`
+- Optional params: same as Neutral Grid
+
+### Market Maker
+
+- Signal: `self.signal(src, sym, quote=value)`
+- Description: Makes a market around a quote price.
+- Mandatory params: `max_position_size`
+- Optional params: `min_spread`, `limit_post_only`, `order_refresh_delay`, `order_min_pct_change`
 
 
 ## Create Websocket Feeds
@@ -159,7 +205,7 @@ Once connected you will receive messages in the format:
 
 ## Create Webhooks
 
-Expose HTTP endpoints to interact with your Signal bot.
+Use HTTP routes to receive external inputs (e.g., TradingView alerts). See [Create Webhooks](https://profitview.net/docs/trading#create-webhooks) in the Trading docs for details.
 
 ```python
 @http.route
@@ -187,24 +233,23 @@ def post_webhook(self, data):
 ## Bot Creation Process in UI
 
 <div class="centered" style="margin-bottom: 20px;">
-    <img src="/assets/images/create-bot.png" alt="Signal Bot Architecture">
+    <img src="/assets/images/create-bot.png" alt="Create Signal Bot">
 </div>
-
 
 1. Click **Bots** in the Signals IDE (bottom left of code window)
 2. Click **Create** button
 3. **Select Symbol** (currently there can only be one symbol traded per Bot)
-4. **Select Bot Type** (see below for details)
-    - **Position**
-    - **Grid** (**Neutral**, **Long** or **Short**)
-    - **Market Maker**
+4. **Select Bot Type** (see above for details)
+   - **Position**
+   - **Grid** (**Neutral**, **Long** or **Short**)
+   - **Market Maker**
 5. **Select Parameters**
-    - possibly specify initial values
-    - possibly specify **Defaults**
-    - possibly make the parameter **Private** (therefore set, but not visible to the user)
+   - optionally specify initial values
+   - optionally specify **Defaults**
+   - optionally make a parameter **Private** (set but not visible to the user)
 6. Fill in 
-    - **Bot Name** (so you can find it in the **Bot Marketplace**)
-    - **Description** (mandatory)
+   - **Bot Name** (so you can find it in the **Bot Marketplace**)
+   - **Description** (mandatory)
 7. Click **Create** to save and deploy
 
 
@@ -231,14 +276,13 @@ def post_webhook(self, data):
 
 ### Supported Exchanges
 
-[Mirror the table from Trading docs if desired, or link to it.]
+Use the [Supported Exchanges list](https://profitview.net/trading-docs/supported-exchanges) in the Trading docs to obtain valid `src` strings for `self.signal(...)`.
 
 
 <!--
 Notes for editors:
-- Image paths mirror the trading doc structure; update to actual asset paths as needed.
 - Keep heading order and formatting consistent with the Trading Bots doc.
-- Replace bracketed sections with your actual Signals content.
+- Replace or localize image paths as needed.
 -->
 
 

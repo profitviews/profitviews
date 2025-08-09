@@ -7,7 +7,7 @@
 A Signal bot is built on an event-driven architecture. Market events trigger callback functions. These callbacks may handle public market data (quotes, trades, candles) and generate signals that downstream bots or processes can consume.
 
 <div class="centered" style="margin-bottom: 20px;">
-    <img src="/assets/images/trading-bot-architecture-whitebg.svg" alt="Signal Bot Architecture">
+    <img src="/assets/images/trading-bot-architecture-white.png" alt="Signal Bot Architecture">
 </div>
 
 Each component in the above diagram has callbacks and methods available to implement your Signal logic.

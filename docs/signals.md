@@ -2,32 +2,19 @@
 
 ## Overview
 
-[Write an overview of Signal bots here: purpose, how signals differ from direct trading execution, typical workflows.]
-
 A Signal bot is built on an event-driven architecture. Market events trigger callback functions. These callbacks may handle public market data (quotes, trades, candles) and generate signals that downstream bots or processes can consume.
 
 <div class="centered" style="margin-bottom: 20px;">
     <img src="/assets/images/trading-bot-architecture-white.png" alt="Signal Bot Architecture">
 </div>
 
-Each component in the above diagram has callbacks and methods available to implement your Signal logic.
-
-<div class="centered">
-    <img src="/assets/images/trading-bot-components.png" alt="Signal Bot Components">
-</div>
-
-We will describe these component callbacks and methods in detail. You should be comfortable with Python 3.9.
-
-
 ## Getting Started
 
-[Add your onboarding steps for Signals here.]
-
-- Sign up for a plan (Hobby, Active Trader, or Professional)
+- Sign up for a plan (Hobby $29, Active Trader $59, or Professional $299)
 - Open the Signals IDE: `https://profitview.net/trading/signals`
 - Create a new file; ensure your main class is defined (see below)
 
-**Note:** your script must define the main class for the runtime to load it.
+**Note:** your script must define the main class for the runtime to load it so that Trading Bots will function.
 
 
 ## Base Class
@@ -67,7 +54,7 @@ The base class `Link` provides helper properties and methods you can use in your
 
 Event callbacks are triggered automatically by live market data.
 
-### Quote Update (public)
+### Quote Update
 
 Receive public market top-of-book quote updates for all subscribed symbols.
 
@@ -85,7 +72,7 @@ Example `data`:
 }
 ```
 
-### Trade Update (public)
+### Trade Update
 
 Receive public market trade updates for all subscribed symbols.
 
@@ -104,7 +91,7 @@ Example `data`:
 }
 ```
 
-### Candle Update Xm (public)
+### Candle Update Xm 
 
 Receive rolling OHLCV bars for a given timeframe.
 
@@ -130,9 +117,7 @@ def candle_update_1m(self, src, sym, bars):
 
 ## Emitting Signals
 
-Use `self.signal(src, sym, **kwargs)` to emit signals for downstream consumers.
-
-[Document the signal fields you use, e.g. size, mid, bid, ask, quote, etc. Provide short examples.]
+Use `self.signal(src, sym, bid=...)` (or similar) to emit signals for downstream consumers.
 
 Examples:
 
@@ -195,18 +180,34 @@ def get_status(self, data):
 def post_webhook(self, data):
     price = data.get("price")
     if price:
-        self.signal("BitMEX", "XBTUSD", mid=price)
+        self.signal("bitmex", "XBTUSD", mid=price)
 ```
 
 
 ## Bot Creation Process in UI
 
+<div class="centered" style="margin-bottom: 20px;">
+    <img src="/assets/images/create-bot.png" alt="Signal Bot Architecture">
+</div>
+
+
 1. Click Bots in the Signals IDE
 2. Click Create
-3. Select your bot category (e.g., Position-like, Grid-like, Market-Maker-like)
-4. Fill in Bot Name and Description
-5. Set any parameters
-6. Click Create to save and deploy
+3. Select a Symbol (currently there can only be one symbol traded per Bot)
+4. Select Bot Type
+    - Position
+    - Grid (Neutral, Long or Short)
+    - Market Maker
+5. Select Parameters
+    - possibly specify initial values
+    - possibly specify Defaults
+    - possibly make the parameter Private (therefore set, but not visible to the user)
+6. Fill in 
+    - Bot Name
+    - Description (mandatory)
+7. Click Create to save and deploy
+
+
 
 
 ## Glossary
@@ -223,11 +224,11 @@ def post_webhook(self, data):
 
 ### Installed Libraries
 
-- numpy: array/matrix calculations
-- pandas: data structures and analysis
-- scikit-learn: ML library
-- scipy: scientific computing
-- TA-Lib: technical analysis
+- `numpy`: array/matrix calculations
+- `pandas`: data structures and analysis
+- `scikit-learn`: ML library
+- `scipy`: scientific computing
+- `talib`: TA-Lib - technical analysis
 
 
 ### Supported Exchanges

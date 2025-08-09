@@ -12,11 +12,14 @@
 
 # Trade Betterᵀᴹ
 
+
+
 ## Latest Work
 
 * [Demystifying Bitcoin Wallets](https://github.com/profitviews/bitcoin-wallet)
 * [How to Create Your First Trading Bot in 30 Minutes](https://profitview.net/events/create-your-first-trading-bot)
 * Its Github: [Grid Bot](https://github.com/profitviews/grid-bot)
+* **[ProfitView Signals Documentation](./docs/signals.md)** - Complete guide to using Signals in ProfitView
 
 Please feel free to sign-up to watch the webinar recording.
 

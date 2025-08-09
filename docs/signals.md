@@ -191,23 +191,21 @@ def post_webhook(self, data):
 </div>
 
 
-1. Click Bots in the Signals IDE
-2. Click Create
-3. Select a Symbol (currently there can only be one symbol traded per Bot)
-4. Select Bot Type
-    - Position
-    - Grid (Neutral, Long or Short)
-    - Market Maker
-5. Select Parameters
+1. Click **Bots** in the Signals IDE (bottom left of code window)
+2. Click **Create** button
+3. **Select Symbol** (currently there can only be one symbol traded per Bot)
+4. **Select Bot Type** (see below for details)
+    - **Position**
+    - **Grid** (**Neutral**, **Long** or **Short**)
+    - **Market Maker**
+5. **Select Parameters**
     - possibly specify initial values
-    - possibly specify Defaults
-    - possibly make the parameter Private (therefore set, but not visible to the user)
+    - possibly specify **Defaults**
+    - possibly make the parameter **Private** (therefore set, but not visible to the user)
 6. Fill in 
-    - Bot Name
-    - Description (mandatory)
-7. Click Create to save and deploy
-
-
+    - **Bot Name** (so you can find it in the **Bot Marketplace**)
+    - **Description** (mandatory)
+7. Click **Create** to save and deploy
 
 
 ## Glossary

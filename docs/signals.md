@@ -123,6 +123,40 @@ def candle_update_1m(self, src, sym, bars):
 - `__init__(self, *args, **kwargs)` — if you override this, you must call `Link.__init__(self, *args, **kwargs)` at some point in `__init__()` to initialize event handling.
 
 
+## Scheduled Tasks (@cron)
+
+Use the `@cron` decorator to run methods on a schedule. Decorate no-arg instance methods of your `Signals` class.
+
+- Exactly one option is required:
+  - `every=<seconds>`: positive int/float seconds
+  - `on='<period>'`: one of `1m, 3m, 5m, 15m, 30m, 1h, 2h, 3h, 4h, 6h, 12h, 1d, 1w`
+  - `expr='<cron expression>'`: standard cron syntax (UTC). See [UNIX cron format](https://www.ibm.com/docs/en/db2/11.5.x?topic=task-unix-cron-format).
+
+Behavior:
+- Runs in background threads; long tasks do not block others
+- First run triggers immediately after script start, then follows schedule
+- Methods must only accept `self` (no additional parameters)
+
+Examples:
+
+```python
+from profitview import Link, logger, cron
+
+class Signals(Link):
+  @cron.run(every=60)
+  def refresh(self):
+    logger.info('refreshing...')
+
+  @cron.run(on='1m')
+  def minutely(self):
+    self.signal('bitmex', 'XBTUSD', size=0.1)
+
+  @cron.run(expr='0 0 * * *')  # every day at 00:00 UTC
+  def daily(self):
+    ...
+```
+
+
 ## Emitting Signals
 
 Use `self.signal(src, sym, bid=...)` (or similar) to emit signals for downstream consumers.

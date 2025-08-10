@@ -15,7 +15,7 @@ A Signal bot is built on an event-driven architecture. Market events trigger cal
 
 - Sign up and verify your email address
 - Choose a plan (Hobby $29, Active Trader $59, or Professional $299)
-- **Signals** is Beta: request access from ProfitView management.
+- **Signals** is Beta: request access from [ProfitView management](mailto:support@profitview.net).
 - Open the Signals IDE: `https://profitview.net/trading/signals`
 - Create a new file; ensure your main class is defined (see below)
 
@@ -24,32 +24,10 @@ A Signal bot is built on an event-driven architecture. Market events trigger cal
 
 ## Base Class
 
-The base class `Link` provides helper properties and methods you can use in your Signal bot.
+The base class `Link` provides helper properties and methods you can use in your Signal bot.  
+Documentation on these can be found in the [Trading docs](https://profitview.net/docs/trading/#base-class).
 
 <div style="margin-bottom: 24px"></div>
-
-#### class Link
-
-> now → `datetime.datetime`
-
->>> Current UTC time
-
-> unix_now → `int`
-
->>> Current unix time in seconds
-
-> epoch_now → `int`
-
->>> Current epoch time in milliseconds
-
-> second → `float`
-
->>> Current second within the minute (high precision)
-
-> iso_now → `str`
-
->>> Current UTC ISO 8601 string
-
 
 ## Event Callbacks
 
@@ -86,15 +64,19 @@ Example `data`:
 ```python
 {
     'side': 'Buy',              # side of taker in trade
-    'price': 121611.5,           # price of matched order
+    'price': 121611.5,          # price of matched order
     'size': 200.0,              # size of matched order
     'time': 1678364683876       # epoch timestamp from exchange
 }
 ```
 
-### Candle Update Xm
+### Candle Update
 
 Receive rolling OHLCV bars for a given timeframe.
+
+Called on each trade thereby updating candle data: `candle_update_XX()` for any XX in
+
+`1m`, `3m`, `5m`, `15m`, `30m`, `1h`, `2h`, `3h`, `4h`, `6h`, `12h`, `1d` and `1w`
 
 ```python
 def candle_update_1m(self, src: str, sym: str, bars)

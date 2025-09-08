@@ -152,8 +152,8 @@ self.signal(src, sym, size=0.5)
 # Neutral grid anchor
 self.signal(src, sym, mid=30000)
 
-# Maker quote fair value
-self.signal(src, sym, quote=30000)
+# Maker quote both sides
+self.signal(src, sym, quote=[2300, 2305])
 ```
 
 

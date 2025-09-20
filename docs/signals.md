@@ -30,58 +30,191 @@ The base class `Link` provides helper properties and methods you can use in your
 
 > #### venues → `dict`
 >>> Exchange venues configured for your account
+>>> 
+>>> **Example:**
+>>> ```python
+>>> print(self.venues)
+>>> # {'BitMEX': {'id': 'abc123', 'kind': 'real', 'name': 'BitMEX', 'src': 'bitmex'}}
+>>> ```
 
 > #### trades → `dict`
 >>> Latest trade data by exchange and symbol
+>>> 
+>>> **Example:**
+>>> ```python
+>>> latest_trade = self.trades['bitmex']['XBTUSD']
+>>> print(f"Last trade: {latest_trade['price']} @ {latest_trade['size']}")
+>>> ```
 
 > #### quotes → `dict`
 >>> Latest quote data by exchange and symbol
+>>> 
+>>> **Example:**
+>>> ```python
+>>> bid, ask = self.quotes['bitmex']['XBTUSD']['bid'][0], self.quotes['bitmex']['XBTUSD']['ask'][0]
+>>> spread = ask - bid
+>>> ```
 
 > #### instruments → `dict`
 >>> Instrument metadata by exchange and symbol
+>>> 
+>>> **Example:**
+>>> ```python
+>>> instrument = self.instruments['bitmex']['XBTUSD']
+>>> print(f"Tick size: {instrument['tickSize']}, Min size: {instrument['lotSize']}")
+>>> ```
 
 > #### market_streams → `dict`
 >>> Active market data subscriptions by exchange
+>>> 
+>>> **Example:**
+>>> ```python
+>>> print(self.market_streams)
+>>> # {'bitmex': ['XBTUSD', 'ETHUSD'], 'coinbasepro': ['BTC-USD']}
+>>> ```
 
 > #### health → `dict`
 >>> Connection health status for public and private feeds
+>>> 
+>>> **Example:**
+>>> ```python
+>>> health = self.health
+>>> for feed in health['public']:
+>>>     if not feed['live']:
+>>>         logger.warning(f"Feed {feed['src']} is disconnected")
+>>> ```
 
 ### Time Properties
 
 > #### now → `datetime.datetime`
 >>> Current UTC time
+>>> 
+>>> **Example:**
+>>> ```python
+>>> current_time = self.now
+>>> print(f"Current time: {current_time}")
+>>> ```
 
 > #### unix_now → `int`
 >>> Current unix time in seconds
+>>> 
+>>> **Example:**
+>>> ```python
+>>> timestamp = self.unix_now
+>>> print(f"Unix timestamp: {timestamp}")
+>>> ```
 
 > #### epoch_now → `int`
 >>> Current epoch time in milliseconds
+>>> 
+>>> **Example:**
+>>> ```python
+>>> epoch_ms = self.epoch_now
+>>> print(f"Epoch milliseconds: {epoch_ms}")
+>>> ```
 
 > #### second → `float`
 >>> Current second within the minute (high precision)
+>>> 
+>>> **Example:**
+>>> ```python
+>>> if self.second > 30:
+>>>     logger.info("More than half way through the minute")
+>>> ```
 
 > #### iso_now → `str`
 >>> Current UTC ISO 8601 string
+>>> 
+>>> **Example:**
+>>> ```python
+>>> iso_time = self.iso_now
+>>> print(f"ISO time: {iso_time}")
+>>> ```
 
 ### Methods
 
 > #### get_bars(src, sym, level) → `Bars`
 >>> Get candle data object for specified exchange, symbol, and timeframe
+>>> 
+>>> **Example:**
+>>> ```python
+>>> bars = self.get_bars('bitmex', 'XBTUSD', '1m')
+>>> if bars:
+>>>     latest_close = bars.closes[-1]
+>>>     rsi = talib.RSI(bars.closes, timeperiod=14)[-1]
+>>> ```
 
 > #### last_trade(src, sym, key=None) → `dict` or `value`
 >>> Get latest trade data for exchange/symbol, optionally filter by key
+>>> 
+>>> **Example:**
+>>> ```python
+>>> # Get full trade data
+>>> trade = self.last_trade('bitmex', 'XBTUSD')
+>>> 
+>>> # Get specific field
+>>> price = self.last_trade('bitmex', 'XBTUSD', 'price')
+>>> size = self.last_trade('bitmex', 'XBTUSD', 'size')
+>>> ```
 
 > #### last_quote(src, sym, key=None) → `dict` or `value`
 >>> Get latest quote data for exchange/symbol, optionally filter by key
+>>> 
+>>> **Example:**
+>>> ```python
+>>> # Get full quote data
+>>> quote = self.last_quote('bitmex', 'XBTUSD')
+>>> 
+>>> # Get specific bid/ask prices
+>>> bid_price = self.last_quote('bitmex', 'XBTUSD', 'bid')[0]
+>>> ask_price = self.last_quote('bitmex', 'XBTUSD', 'ask')[0]
+>>> ```
 
 > #### publish(topic, data=None) → `None`
 >>> Publish message to private websocket stream (see [WebSocket Documentation](https://profitview.net/docs/websocket))
+>>> 
+>>> **Example:**
+>>> ```python
+>>> # Simple status update
+>>> self.publish('status', {'active': True, 'timestamp': self.epoch_now})
+>>> 
+>>> # Strategy metrics
+>>> self.publish('metrics', {
+>>>     'rsi': 65.5,
+>>>     'signal_strength': 0.8,
+>>>     'position': 'long'
+>>> })
+>>> ```
 
 > #### signal(src, sym, **intents) → `None`
 >>> Send trading intent signals to execution system (see [Signal Documentation](https://profitview.net/docs/signals))
+>>> 
+>>> **Example:**
+>>> ```python
+>>> # Position signal
+>>> self.signal('bitmex', 'XBTUSD', size=0.5)
+>>> 
+>>> # Grid signals
+>>> self.signal('bitmex', 'XBTUSD', mid=30000)
+>>> self.signal('bitmex', 'XBTUSD', bid=29500)
+>>> 
+>>> # Market maker
+>>> self.signal('bitmex', 'XBTUSD', quote=[29950, 30050])
+>>> ```
 
 > #### stop_trading(msg=None) → `None`
 >>> Terminate the trading script
+>>> 
+>>> **Example:**
+>>> ```python
+>>> # Emergency stop
+>>> if error_condition:
+>>>     self.stop_trading("Critical error detected")
+>>> 
+>>> # Scheduled shutdown
+>>> if self.now.hour == 23:
+>>>     self.stop_trading("End of trading day")
+>>> ```
 
 For additional documentation on these methods, see the [Trading docs](https://profitview.net/docs/trading/#base-class).
 

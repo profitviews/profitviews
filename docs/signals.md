@@ -24,8 +24,66 @@ A Signal bot is built on an event-driven architecture. Market events trigger cal
 
 ## Base Class
 
-The base class `Link` provides helper properties and methods you can use in your Signal bot.  
-Documentation on these can be found in the [Trading docs](https://profitview.net/docs/trading/#base-class).
+The base class `Link` provides helper properties and methods you can use in your Signal bot.
+
+### Properties
+
+> #### venues → `dict`
+>>> Exchange venues configured for your account
+
+> #### trades → `dict`
+>>> Latest trade data by exchange and symbol
+
+> #### quotes → `dict`
+>>> Latest quote data by exchange and symbol
+
+> #### instruments → `dict`
+>>> Instrument metadata by exchange and symbol
+
+> #### market_streams → `dict`
+>>> Active market data subscriptions by exchange
+
+> #### health → `dict`
+>>> Connection health status for public and private feeds
+
+### Time Properties
+
+> #### now → `datetime.datetime`
+>>> Current UTC time
+
+> #### unix_now → `int`
+>>> Current unix time in seconds
+
+> #### epoch_now → `int`
+>>> Current epoch time in milliseconds
+
+> #### second → `float`
+>>> Current second within the minute (high precision)
+
+> #### iso_now → `str`
+>>> Current UTC ISO 8601 string
+
+### Methods
+
+> #### get_bars(src, sym, level) → `Bars`
+>>> Get candle data object for specified exchange, symbol, and timeframe
+
+> #### last_trade(src, sym, key=None) → `dict` or `value`
+>>> Get latest trade data for exchange/symbol, optionally filter by key
+
+> #### last_quote(src, sym, key=None) → `dict` or `value`
+>>> Get latest quote data for exchange/symbol, optionally filter by key
+
+> #### publish(topic, data=None) → `None`
+>>> Publish message to private websocket stream
+
+> #### signal(src, sym, **intents) → `None`
+>>> Send trading intent signals to execution system
+
+> #### stop_trading(msg=None) → `None`
+>>> Terminate the trading script
+
+For additional documentation on these methods, see the [Trading docs](https://profitview.net/docs/trading/#base-class).
 
 <div style="margin-bottom: 24px"></div>
 

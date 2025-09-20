@@ -75,10 +75,10 @@ The base class `Link` provides helper properties and methods you can use in your
 >>> Get latest quote data for exchange/symbol, optionally filter by key
 
 > #### publish(topic, data=None) → `None`
->>> Publish message to private websocket stream
+>>> Publish message to private websocket stream (see [WebSocket Documentation](https://profitview.net/docs/websocket))
 
 > #### signal(src, sym, **intents) → `None`
->>> Send trading intent signals to execution system
+>>> Send trading intent signals to execution system (see [Signal Documentation](https://profitview.net/docs/signals))
 
 > #### stop_trading(msg=None) → `None`
 >>> Terminate the trading script

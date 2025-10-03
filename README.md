@@ -12,7 +12,9 @@
 
 # Trade Betterᵀᴹ
 
+## Quick Links
 
+🔗 **[ProfitView Linktree](https://linktr.ee/profitview)** - All our links in one place
 
 ## Latest Work
 
@@ -36,9 +38,16 @@ Please see [ProfitView Events](https://profitview.net/events) to view recordings
 * Python algo workshops [I](https://profitview.net/events/algorithmic-trading-with-python), [II](https://profitview.net/events/algorithmic-trading-with-python-part-2) and [III](https://profitview.net/events/algorithmic-trading-with-python-part-3) - see [Workshops](https://github.com/profitviews/workshops) repo
 * [Python with C++](https://profitview.net/events/cpp-python-algo-trading) - see [Fast Python Backtest](https://github.com/profitviews/fast-python-backtest) repo
 
-## Blogs
+## Latest Blog Posts
 
-See [ProfitView's Blog](https://profitview.net/blog), in particular some Python algo-trading related ones:
+See [ProfitView's Blog](https://profitview.net/blog) for the latest insights:
+
+* **[How to Arbitrage Bitcoin using BlackRock's IBIT ETF and BitMEX Perpetual Futures with ProfitView](https://profitview.net/blog/how-to-arbitrage-bitcoin-using-blackrocks-ibit-etf-and-bitmex-perpetual-futures-with-profitview)** (March 22, 2025) - Learn how to set up profitable arbitrage between traditional and crypto markets
+* **[Multi-Asset Algorithmic Trading with Python: Extending ProfitView Beyond Crypto to OANDA Forex](https://profitview.net/blog/multi-asset-algorithmic-trading-with-python-extending-profitview-beyond-crypto-to-oanda-forex)** (February 13, 2025) - Expand your trading strategies across multiple asset classes
+* **[How I Used DeepSeek to Build a Profitable DeFi Trading Algorithm in One Morning](https://profitview.net/blog/how-i-used-deepseek-to-build-a-profitable-defi-trading-algorithm-in-one-morning)** (January 28, 2025) - Discover how AI can accelerate your trading algorithm development
+
+### Popular Posts
+
 * [Why Python is Better than C++ for Algotrading](https://profitview.net/blog/why-python-is-better-than-cpp-for-algotrading)
 * [Algo Trading with Google Sheets](https://profitview.net/blog/algo-trading-with-google-sheets) - and the [repo](https://github.com/profitviews/botsheet)
 * [C++/Python Programming - a brief history](https://profitview.net/blog/cpp-python-algotrading)

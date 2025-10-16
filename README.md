@@ -18,6 +18,7 @@
 
 ## Latest Work
 
+* [Battle of the Bots](https://profitview.net/battle-of-the-bots)
 * [Demystifying Bitcoin Wallets](https://github.com/profitviews/bitcoin-wallet)
 * [How to Create Your First Trading Bot in 30 Minutes](https://profitview.net/events/create-your-first-trading-bot)
 * Its Github: [Grid Bot](https://github.com/profitviews/grid-bot)
@@ -27,9 +28,10 @@ Please feel free to sign-up to watch the webinar recording.
 
 ## BitMEX/ProfitView Algo Academy
 
-Go to [BitMEX Guilds](https://www.bitmex.com/guilds) and join **Algo Academy**.  Join the [Discord](https://discord.com/invite/2EYZtHUxnX) too.
+Join our [regular Tech Sessions](https://tally.so/r/mZqBXa) - we show you, in practice, how to algo trade:
 
-Have a look at the collaboratively written algos that are emerging in the [Algo Academy](https://github.com/profitviews/bitmex-algo-academy) repo.
+* [Battle of the Bots](https://profitview.net/battle-of-the-bots) algo construction: [Battle](https://github.com/profitviews/battle)
+* Some past algos from the [Algo Academy](https://github.com/profitviews/bitmex-algo-academy) repo.
 
 ## More Events - and Code
 

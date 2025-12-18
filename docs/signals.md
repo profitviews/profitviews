@@ -1,14 +1,34 @@
-# Signal Bots
+# Signal Bots & Trading Bots
 
 ## Overview
 
-The Signals interface in ProfitView lets you build event-driven trading strategies in Python. Your strategy reacts to live market events and sends trading intent using `self.signal(...)`. Execution, risk management, and exchange connectivity are handled by ProfitView.
+ProfitView provides two complementary systems for building event-driven trading strategies in Python:
 
-A Signal bot is built on an event-driven architecture. Market events trigger callback functions. These callbacks may handle public market data (quotes, trades, candles) and generate signals that downstream bots or processes can consume.
+1. **Signal Bots**: Your strategy reacts to live market events and sends trading intent using `self.signal(...)`. Execution, risk management, and exchange connectivity are handled by ProfitView. Signal bots are ideal when you want to focus on strategy logic while delegating order execution to ProfitView's risk management system.
+
+2. **Trading Bots**: Your strategy directly interacts with exchanges using the Exchange API (e.g., `self.create_limit_order(...)`, `self.fetch_positions(...)`). You have full control over order placement, cancellation, and position management. Trading bots are ideal when you need precise control over execution logic.
+
+Both systems are built on an event-driven architecture. Market events trigger callback functions. These callbacks handle public market data (quotes, trades, candles) and, for Trading Bots, private updates (orders, fills, positions).
 
 <div class="centered" style="margin-bottom: 20px;">
     <img src="/assets/images/trading-bot-architecture-white.png" alt="Signal Bot Architecture">
 </div>
+
+### Choosing Between Signal Bots and Trading Bots
+
+**Use Signal Bots when:**
+- You want ProfitView to handle order execution, risk management, and position limits
+- You prefer expressing trading intent (e.g., "I want 0.5 BTC long") rather than managing individual orders
+- You want to use pre-built bot types (Position, Grid, Market Maker) with configurable parameters
+- You want to focus on strategy logic and signal generation
+
+**Use Trading Bots when:**
+- You need precise control over order placement, cancellation, and amendment
+- You want to implement custom execution logic (e.g., TWAP, VWAP, iceberg orders)
+- You need to query exchange state directly (balances, positions, open orders)
+- You want to call native exchange APIs for advanced features
+
+**Note:** These are separate systems accessed via different tabs in the ProfitView interface (under the Signals section: "Trading" and "Signals" tabs). You should choose one approach for your strategy - they are not designed to be mixed in the same codebase.
 
 
 ## Getting Started
@@ -16,10 +36,13 @@ A Signal bot is built on an event-driven architecture. Market events trigger cal
 - Sign up and verify your email address
 - Choose a plan (Hobby $29, Active Trader $59, or Professional $299)
 - **Signals** is Beta: request access from [ProfitView management](mailto:support@profitview.net).
-- Open the Signals IDE: `https://profitview.net/trading/signals`
+- Open the Trading IDE: `https://profitview.net/trading/signals`
+- Choose either the **"Trading"** tab or **"Signals"** tab (both are under the Signals section)
 - Create a new file; ensure your main class is defined (see below)
 
-**Note:** your script must define the main `Signals` class for the runtime to load it so that Trading Bots will function.
+**Note:** 
+- For **Signal Bots** (use the "Signals" tab), your script must define the main `Signals` class for the runtime to load it.
+- For **Trading Bots** (use the "Trading" tab), your script must define the main `Trading` class for the runtime to load it.
 
 
 ## Base Class
@@ -290,10 +313,301 @@ def candle_update_1m(self, src, sym, bars):
         self.signal(src, sym, size=-0.5)
 ```
 
+### Private Event Callbacks (Trading Bots)
+
+When using Trading Bots (direct order placement), you receive private updates about your orders and positions.
+
+#### Order Update
+
+Receive private order updates from all connected exchanges.
+
+```python
+def order_update(self, src: str, sym: str, data: dict)
+```
+
+Example `data`:
+
+```python
+{
+    'venue': 'BitMEX',          # name of your venue
+    'side': 'Buy',              # can be 'Buy' or 'Sell'
+    'order_price': 20500.0,     # price of order placed
+    'order_size': 1000.0,       # submitted size of order placed
+    'remain_size': 1000.0,      # remaining size of order placed
+    'order_type': 'LIMIT',      # typically 'LIMIT' or 'MARKET'
+    'time': 1678320346997,      # epoch timestamp from exchange
+    'order_id': 'd9a4ec1e8861', # unique order id from exchange
+    'info': { object }          # unparsed data from exchange ws feed
+}
+```
+
+**Notes:**
+- `venue` is the name set in your [exchange settings](https://profitview.net/app/settings/exchanges)
+- `order_id` should be used when amending or cancelling orders with the Exchange API
+
+#### Fill Update
+
+Receive private trade fill updates from all connected exchanges.
+
+```python
+def fill_update(self, src: str, sym: str, data: dict)
+```
+
+Example `data`:
+
+```python
+{
+    'venue': 'BitMEX',           # name of your venue
+    'side': 'Sell',             # can be 'Buy' or 'Sell'
+    'fill_price': 21638.5,      # price order filled at
+    'fill_size': 100.0,         # total filled size of order
+    'order_type': 'MARKET',     # typically 'LIMIT' or 'MARKET'
+    'time': 1678361696643,      # epoch timestamp from exchange
+    'order_id': 'b0883c17a23b', # unique order id from exchange
+    'trade_id': '67fd1a6c7069', # unique trade id from exchange
+    'info': { object }          # unparsed data from exchange ws feed
+}
+```
+
+#### Position Update
+
+Receive private position updates from all connected exchanges.
+
+```python
+def position_update(self, src: str, sym: str, data: dict)
+```
+
+Example `data`:
+
+```python
+{
+    'venue': 'BitMEX',           # name of your venue
+    'pos_size': -500.0,         # current position size of sym
+    'mark_price': 64928.63,     # exchange mark price used for margining
+    'entry_price': 65291.12,    # entry price of position if available
+    'liq_price': 28870.5,       # liquidation price of position
+    'time': 1713640060717,      # epoch timestamp from exchange
+    'info': { object }          # unparsed data from exchange ws feed
+}
+```
+
 ### Initialization
 
 - `on_start(self)` — runs once when `Link` infrastructure is ready. Note **callbacks may trigger before this**.
 - `__init__(self, *args, **kwargs)` — if you override this, you must call `Link.__init__(self, *args, **kwargs)` at some point in `__init__()` to initialize event handling.
+
+
+## Exchange API (Trading Bots)
+
+Trading Bots interact with connected exchange accounts using a common API. This includes: getting candle data, open orders, current positions; creating limit and market orders; cancelling and amending existing orders.
+
+Each Exchange API call returns a `dict` object with the following structure:
+
+- `src`: exchange identifier (e.g., `bitmex`)
+- `venue`: name of your connected exchange as set in [exchange settings](https://profitview.net/app/settings/exchanges)
+- `data`: payload response from calling exchange endpoint (either `list` or `dict`)
+- `error`: exchange API request error (returns `None` if no error)
+- `rate_limits`: remaining exchange API rate limits with `remaining` (credits) and `reset` (unix time when limits reset)
+
+### Fetch Candles
+
+```python
+self.fetch_candles(venue, sym=sym, level='1m', since=None)
+```
+
+Fetch open, high, low, close, volume (OHLCV) candle data for symbol from an exchange account.
+
+**Parameters:**
+- `venue` (str, required): Name of exchange API key e.g. `"BitMEX"`
+- `sym` (str, required): Symbol for which candle data is required
+- `level` (str, optional): Time frame for candle data e.g. `"1m"`, `"15m"`, `"1h"`, `"1d"`
+- `since` (int, optional): Timestamp in milliseconds of the earliest candle to fetch
+
+**Example:**
+```python
+candles = self.fetch_candles('BitMEX', sym='XBTUSD', level='1h', since=1681187280000)
+if candles['data']:
+    latest = candles['data'][-1]
+    print(f"Close: {latest['close']}, Volume: {latest['volume']}")
+```
+
+### Fetch Balances
+
+```python
+self.fetch_balances(venue)
+```
+
+Fetch all wallet balances for an exchange account.
+
+**Parameters:**
+- `venue` (str, required): Name of exchange API key e.g. `"BitMEX"`
+
+**Example:**
+```python
+balances = self.fetch_balances('BitMEX')
+for balance in balances['data']:
+    print(f"{balance['asset']}: {balance['amount']}")
+```
+
+### Fetch Open Orders
+
+```python
+self.fetch_open_orders(venue)
+```
+
+Fetch all open orders for an exchange account.
+
+**Parameters:**
+- `venue` (str, required): Name of exchange API key e.g. `"BitMEX"`
+
+**Example:**
+```python
+orders = self.fetch_open_orders('BitMEX')
+for order in orders['data']:
+    print(f"Order {order['order_id']}: {order['side']} {order['order_size']} @ {order['order_price']}")
+```
+
+### Fetch Open Positions
+
+```python
+self.fetch_positions(venue)
+```
+
+Fetch all open positions for an exchange account.
+
+**Parameters:**
+- `venue` (str, required): Name of exchange API key e.g. `"BitMEX"`
+
+**Example:**
+```python
+positions = self.fetch_positions('BitMEX')
+for pos in positions['data']:
+    print(f"Position {pos['sym']}: {pos['pos_size']} @ {pos['entry_price']}")
+```
+
+### Create Limit Order
+
+```python
+self.create_limit_order(venue, sym=sym, side=side, size=size, price=price)
+```
+
+Create a limit order for an exchange account.
+
+**Parameters:**
+- `venue` (str, required): Name of exchange API key e.g. `"BitMEX"`
+- `sym` (str, required): Symbol of order to be submitted
+- `side` (str, required): Side of order, can be either `"Buy"` or `"Sell"`
+- `size` (float, required): Size of order to be placed
+- `price` (float, required): Price of order to be placed
+
+**Example:**
+```python
+response = self.create_limit_order('BitMEX', sym='XBTUSD', side='Buy', size=100.0, price=30000.0)
+if response['error'] is None:
+    print(f"Order placed: {response['data']['order_id']}")
+```
+
+### Create Market Order
+
+```python
+self.create_market_order(venue, sym=sym, side=side, size=size)
+```
+
+Create a market order for an exchange account.
+
+**Parameters:**
+- `venue` (str, required): Name of exchange API key e.g. `"BitMEX"`
+- `sym` (str, required): Symbol of order to be submitted
+- `side` (str, required): Side of order, can be either `"Buy"` or `"Sell"`
+- `size` (float, required): Size of order to be placed
+
+**Example:**
+```python
+response = self.create_market_order('BitMEX', sym='XBTUSD', side='Sell', size=50.0)
+if response['error'] is None:
+    print(f"Market order filled: {response['data']['order_id']}")
+```
+
+### Cancel Order
+
+```python
+self.cancel_order(venue, order_id=order_id, sym=sym)
+```
+
+Cancel a single or multiple open orders for an exchange account.
+
+**Parameters:**
+- `venue` (str, required): Name of exchange API key e.g. `"BitMEX"`
+- `order_id` (str, optional): ID of order to be cancelled
+- `sym` (str, optional): Symbol of orders to be cancelled
+
+**Notes:**
+- If neither `order_id` or `sym` are provided, all open orders will be cancelled
+- If only `order_id` is provided, this particular order will be cancelled
+- If only `sym` is provided, all orders with this symbol will be cancelled
+
+**Example:**
+```python
+# Cancel specific order
+self.cancel_order('BitMEX', order_id='d9a4ec1e8861')
+
+# Cancel all orders for a symbol
+self.cancel_order('BitMEX', sym='XBTUSD')
+
+# Cancel all orders
+self.cancel_order('BitMEX')
+```
+
+### Amend Order
+
+```python
+self.amend_order(venue, order_id=order_id, size=size, price=price)
+```
+
+Amend a single open order for an exchange account.
+
+**Parameters:**
+- `venue` (str, required): Name of exchange API key e.g. `"BitMEX"`
+- `order_id` (str, required): Order id of order to be amended
+- `size` (float, optional): New size of order to be amended
+- `price` (float, optional): New price of order to be amended
+
+**Note:** At least one of `price` or `size` needs to be provided for the order amendment to be valid.
+
+**Example:**
+```python
+# Amend order price
+self.amend_order('BitMEX', order_id='d9a4ec1e8861', price=30100.0)
+
+# Amend order size
+self.amend_order('BitMEX', order_id='d9a4ec1e8861', size=150.0)
+
+# Amend both price and size
+self.amend_order('BitMEX', order_id='d9a4ec1e8861', price=30100.0, size=150.0)
+```
+
+### Call Endpoint
+
+```python
+self.call_endpoint(venue, path, version, method='GET', params=None)
+```
+
+Call a native REST API of the exchange.
+
+**Parameters:**
+- `venue` (str, required): Name of exchange API key e.g. `"BitMEX"`
+- `path` (str, required): Path of the native API endpoint, e.g. `"instrument"`
+- `version` (str, required): `"public"` or `"private"`
+- `method` (str, required): HTTP method e.g. `"GET"` or `"POST"`
+- `params` (dict, optional): Dictionary of parameters to pass to the endpoint
+
+**Example:**
+```python
+# Get instrument info
+instruments = self.call_endpoint('BitMEX', 'instrument', 'public', method='GET', params={'symbol': 'XBTUSD'})
+```
+
+For additional documentation on these methods, see the [Trading docs](https://profitview.net/docs/trading/#exchange-api).
 
 
 ## Scheduled Tasks (@cron)
@@ -330,9 +644,9 @@ class Signals(Link):
 ```
 
 
-## Emitting Signals
+## Emitting Signals (Signal Bots)
 
-Use `self.signal(src, sym, bid=...)` (or similar) to emit signals for downstream consumers.
+Use `self.signal(src, sym, bid=...)` (or similar) to emit signals for downstream consumers. This section applies to **Signal Bots** only. For **Trading Bots**, use the [Exchange API](#exchange-api-trading-bots) methods instead.
 
 Examples:
 
@@ -472,7 +786,9 @@ def post_webhook(self, data):
 ```
 
 
-## Bot Creation Process in UI
+## Bot Creation Process in UI (Signal Bots)
+
+This section applies to **Signal Bots** only. Trading Bots execute directly without requiring bot creation in the UI.
 
 <div class="centered" style="margin-bottom: 20px;">
     <img src="/assets/images/create-bot.png" alt="Create Signal Bot">
@@ -481,7 +797,7 @@ def post_webhook(self, data):
 1. Click **Bots** in the Signals IDE (bottom left of code window)
 2. Click **Create** button
 3. **Select Symbol** (currently there can only be one symbol traded per Bot)
-4. **Select Bot Type** (see above for details)
+4. **Select Bot Type** (see [Bot Types & Signal Formats](#bot-types--signal-formats) for details)
    - **Position**
    - **Grid** (**Neutral**, **Long** or **Short**)
    - **Market Maker**
